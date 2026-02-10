@@ -1,0 +1,9 @@
+[submodule "ferrum"]
+	path = ferrum
+	url = git@github.com:rubycdp/ferrum.git
+[submodule "cuprite"]
+	path = cuprite
+	url = git@github.com:rubycdp/cuprite.git
+[submodule "vessel"]
+	path = vessel
+	url = git@github.com:rubycdp/vessel.git
