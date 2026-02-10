@@ -1,9 +1,9 @@
 [submodule "ferrum"]
-	path = ferrum
+	path = projects/ferrum
 	url = git@github.com:rubycdp/ferrum.git
 [submodule "cuprite"]
-	path = cuprite
+	path = projects/cuprite
 	url = git@github.com:rubycdp/cuprite.git
 [submodule "vessel"]
-	path = vessel
+	path = projects/vessel
 	url = git@github.com:rubycdp/vessel.git
