@@ -70,7 +70,7 @@ const config: Config = {
       title: 'RubyCDP',
       logo: {
         alt: 'Ferrum Logo',
-        src: 'img/logo.svg',
+        src: 'img/favicon-128.ico',
       },
       items: [
         {
@@ -87,21 +87,16 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Getting Started',
+              label: 'Ferrum',
               to: 'docs/ferrum/introduction',
             },
-          ],
-        },
-        {
-          title: 'Community',
-          items: [
             {
-              label: 'GitHub',
-              href: 'https://github.com/rubycdp/ferrum',
+              label: 'Cuprite',
+              to: 'docs/cuprite/introduction',
             },
             {
-              label: 'Issues',
-              href: 'https://github.com/rubycdp/ferrum/issues',
+              label: 'Vessel',
+              to: 'docs/vessel/introduction',
             },
           ],
         },

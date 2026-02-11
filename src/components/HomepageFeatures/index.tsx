@@ -11,32 +11,31 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Simple & Clean API',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    title: 'High-level gem to control Chrome in Ruby',
+    Svg: require('@site/static/img/ferrum.svg').default,
     description: (
       <>
-        High-level Ruby API to control Chrome. As simple as Puppeteer, though even simpler.
+        High-level Ruby API to control Chrome.
         No Selenium/WebDriver/ChromeDriver dependency required.
       </>
     ),
   },
   {
-    title: 'Direct Chrome DevTools Protocol',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: 'Headless Chrome driver for Capybara',
+    Svg: require('@site/static/img/cuprite.svg').default,
     description: (
       <>
-        Connect directly to Chrome via CDP protocol. Access powerful features that go beyond
-        traditional WebDriver capabilities.
+        Run Capybara tests on a headless Chrome or Chromium using Ferrum.
       </>
     ),
   },
   {
-    title: 'Headless by Default',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'High-level web crawling framework',
+    Svg: require('@site/static/img/vessel.svg').default,
     description: (
       <>
-        Run Chrome headless for faster automation, or switch to headful mode for debugging.
-        Perfect for web scraping, testing, and automation tasks.
+        Perfect for web scraping. High-level web crawling framework based on Ferrum for extracting the data from websites.
+        Use it for data mining, monitoring or historical archival.
       </>
     ),
   },

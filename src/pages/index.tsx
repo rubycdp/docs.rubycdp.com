@@ -26,8 +26,8 @@ function HomepageHeader() {
           <Link
             className="button button--outline button--secondary button--lg"
             to="https://github.com/rubycdp/ferrum"
-            style={{marginLeft: '1rem'}}>
-            View on GitHub
+            style={{marginLeft: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+            <img src="img/github.svg" alt="GitHub" style={{width: '30px', height: '30px'}} /> Star
           </Link>
         </div>
       </div>
@@ -41,9 +41,9 @@ export default function Home(): ReactNode {
     <Layout
       title={`${siteConfig.title} - High-level API to control Chrome in Ruby`}
       description="Ferrum is a high-level API to control Chrome in Ruby.">
-      <HomepageHeader />
+      <HomepageHeader/>
       <main>
-        <HomepageFeatures />
+        <HomepageFeatures/>
       </main>
     </Layout>
   );
