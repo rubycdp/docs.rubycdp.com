@@ -14,7 +14,7 @@ Returns cookies hash
 page.cookies.all # => {"NID"=>#<Ferrum::Cookies::Cookie:0x0000558624b37a40 @attributes={"name"=>"NID", "value"=>"...", "domain"=>".google.com", "path"=>"/", "expires"=>1583211046.575681, "size"=>178, "httpOnly"=>true, "secure"=>false, "session"=>false}>}
 ```
 
-#### [](value) : `Cookie`
+#### \[\](value) : `Cookie`
 
 Returns cookie
 

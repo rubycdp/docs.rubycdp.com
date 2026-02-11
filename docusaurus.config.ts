@@ -90,10 +90,6 @@ const config: Config = {
               label: 'Getting Started',
               to: 'docs/ferrum/introduction',
             },
-            {
-              label: 'API Reference',
-              to: '/docs/api/navigation',
-            },
           ],
         },
         {
