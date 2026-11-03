@@ -51,7 +51,7 @@ jobs:
 
       - name: Check out released docs
         run: |
-          git config url."https://github.com/".insteadOf git@github.com:
+          git config --global url."https://github.com/".insteadOf git@github.com:
           git submodule update --init "projects/$PROJECT"
           git -C "projects/$PROJECT" fetch --tags origin
           git -C "projects/$PROJECT" checkout "tags/$TAG"
