@@ -1,0 +1,78 @@
+name: Sync docs
+
+on:
+  repository_dispatch:
+    types:
+      - docs-release
+  workflow_dispatch:
+    inputs:
+      project:
+        description: Project to sync
+        required: true
+        type: choice
+        options:
+          - ferrum
+          - cuprite
+          - vessel
+      tag:
+        description: Release tag, e.g. v0.17.0
+        required: true
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: sync-docs
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT: ${{ github.event.client_payload.project || inputs.project }}
+      TAG: ${{ github.event.client_payload.tag || inputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Validate input
+        run: |
+          case "$PROJECT" in ferrum|cuprite|vessel) ;; *) echo "Unknown project: $PROJECT"; exit 1 ;; esac
+          [[ "$TAG" =~ ^v[0-9]+(\.[0-9]+)*$ ]] || { echo "Invalid tag: $TAG"; exit 1; }
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+
+      - name: Check out released docs
+        run: |
+          git config url."https://github.com/".insteadOf git@github.com:
+          git submodule update --init "projects/$PROJECT"
+          git -C "projects/$PROJECT" fetch --tags origin
+          git -C "projects/$PROJECT" checkout "tags/$TAG"
+
+      - name: Sync docs
+        run: rake sync_docs
+
+      - name: Commit and push
+        id: commit
+        run: |
+          git add "projects/$PROJECT" docs
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs($PROJECT): sync docs for $TAG"
+          git push origin HEAD:master
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy
+        if: steps.commit.outputs.changed == 'true'
+        run: gh workflow run deploy.yml --ref master
