@@ -36,7 +36,7 @@ Returns service worker targets registered in this context. Unlike `workers`, the
 are not connected to -- call `attach_target` first if you want to interact with one.
 
 ```ruby
-page.evaluate_async(%(navigator.serviceWorker.register("/sw.js").then(arguments[0])), 5)
+page.evaluate(%(await navigator.serviceWorker.register("/sw.js")))
 
 sleep 0.1
 
@@ -82,7 +82,16 @@ worker.network.wait_for_idle
 worker.network.traffic # => [#<Ferrum::Network::Exchange, ...]
 ```
 
-#### evaluate / execute / evaluate_async
+#### console : `Console`
+
+Same API as `page.console` -- see [JavaScript](/docs/ferrum/javascript#console). Collects the worker's own
+`console.*` calls and uncaught exceptions.
+
+```ruby
+worker.console.map(&:text) # => ["from worker"]
+```
+
+#### evaluate / execute / evaluate_handle
 
 Same API as on `Page`/`Frame` -- see [JavaScript](/docs/ferrum/javascript). A worker has a single execution context,
 so there's no frame to target.
@@ -91,10 +100,10 @@ so there's no frame to target.
 worker.evaluate("1 + 1") # => 2
 ```
 
-#### on(:request) / on(:auth)
+#### on(:request) / on(:auth) / on(:console)
 
 Subscribe to the worker's own network interception events, same as `page.on(:request)` -- see the `intercept` method
-in [Network](/docs/ferrum/network).
+in [Network](/docs/ferrum/network), or to its new console messages.
 
 #### close : `Boolean`
 
