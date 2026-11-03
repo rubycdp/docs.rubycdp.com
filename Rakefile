@@ -21,6 +21,9 @@ task :sync_docs do
     # Ensure destination directory exists
     FileUtils.mkdir_p(dest_dir)
 
+    # Drop pages removed or renamed upstream
+    FileUtils.rm_f(Dir.glob(File.join(dest_dir, '*.md')))
+
     # Copy all Markdown files
     Dir.glob(File.join(source_dir, '*.md')).each do |file|
       filename = File.basename(file)
