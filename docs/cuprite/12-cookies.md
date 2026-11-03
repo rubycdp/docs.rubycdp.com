@@ -4,46 +4,24 @@ sidebar_position: 12
 
 # Cookies
 
-#### cookies : `Hash<String, Ferrum::Cookies::Cookie>`
-
-Returns cookies accessible to the current page. The keys are cookie names, the
-values are cookie objects with `name`, `value`, `domain`, `path`, `size`,
-`secure?`, `httponly?`, `session?`, `samesite` and `expires` methods.
+Manipulate cookies with Ferrum's [cookies](/docs/ferrum/cookies). Cookies are
+cleared at the end of every test.
 
 ```ruby
-page.driver.cookies["session_id"].value # => "abc"
+cookies = page.driver.browser.cookies
+cookies.set(name: "stealth", value: "omg", path: "/", expires: Time.now + 3600)
+cookies["stealth"].value # => "omg"
+cookies.all # => { "stealth" => #<Ferrum::Cookies::Cookie ...> }
+cookies.remove(name: "stealth")
+cookies.clear
 ```
 
-#### set_cookie(name, value, options = {})
+`set` and `remove` default `domain:` to the host of the last `visit`, or to
+`Capybara.app_host` (or Capybara's server) before the first visit. Pass
+`domain:` for other hosts.
 
-Sets a cookie. Domain defaults to the current page's host, or to
-`Capybara.app_host` (or `127.0.0.1`) if no page was visited yet.
+Cookie objects have `name`, `value`, `domain`, `path`, `size`, `secure?`,
+`httponly?`, `session?`, `samesite` and `expires` methods.
 
-* options `Hash`
-  * :domain `String`
-  * :path `String`
-  * :secure `Boolean`
-  * :httponly `Boolean`
-  * :samesite `String`
-  * :expires `Time`
-
-```ruby
-page.driver.set_cookie("stealth", "omg", path: "/", expires: Time.now + 3600)
-```
-
-#### remove_cookie(name, \*\*options)
-
-Removes a cookie. Domain defaults to the current page's host, you can pass
-`:domain` or `:url`.
-
-```ruby
-page.driver.remove_cookie("stealth")
-```
-
-#### clear_cookies
-
-Removes all cookies.
-
-```ruby
-page.driver.clear_cookies
-```
+`page.driver.cookies`, `set_cookie`, `remove_cookie` and `clear_cookies` are
+deprecated in favor of these.
