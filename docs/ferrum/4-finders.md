@@ -58,29 +58,51 @@ page.go_to("https://github.com/")
 page.xpath("//a[@aria-label='Issues you created']") # => [Node]
 ```
 
-#### current_url : `String`
+#### wait_css(selector, \*\*options) : `Node` | `nil`
 
-Returns current top window location href.
+#### wait_xpath(selector, \*\*options) : `Node` | `nil`
+
+Polls `at_css` or `at_xpath` until a node matches the selector and returns it, or `nil` if none does within
+`timeout`. `wait_css!` and `wait_xpath!` raise `Ferrum::TimeoutError` instead.
+
+* selector `String`
+* options `Hash`
+  * :within `Node` | `nil`
+  * :timeout `Numeric` how long to keep trying, the page timeout by default
+  * :interval `Numeric` seconds to sleep between attempts, `0.05` by default
 
 ```ruby
-page.go_to("https://google.com/")
-page.current_url # => "https://www.google.com/"
+page.go_to("https://github.com/")
+page.wait_css("a[aria-label='Issues you created']") # => Node
+page.wait_xpath!("//a[@aria-label='Issues you created']") # => Node
 ```
 
-#### current_title : `String`
+#### url : `String`
 
-Returns current top window title
+Returns the page's location href. On a frame `url` is that frame's own, see [Frames](/docs/ferrum/frames).
 
 ```ruby
 page.go_to("https://google.com/")
-page.current_title # => "Google"
+page.url # => "https://www.google.com/"
 ```
 
-#### body : `String`
+#### title : `String`
 
-Returns current page's html.
+Returns the page's title.
 
 ```ruby
 page.go_to("https://google.com/")
-page.body # => '<html itemscope="" itemtype="http://schema.org/WebPage" lang="ru"><head>...
+page.title # => "Google"
+```
+
+`current_url` and `current_title` are deprecated and will be removed in 0.22, use `url` and `title`.
+
+#### html : `String`
+
+Returns the HTML of the whole document, `<html>` included. `body` is deprecated and will be removed in 0.22, it never
+returned only `<body>`.
+
+```ruby
+page.go_to("https://google.com/")
+page.html # => '<html itemscope="" itemtype="http://schema.org/WebPage" lang="ru"><head>...
 ```

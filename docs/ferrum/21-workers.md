@@ -78,7 +78,7 @@ Same API as `page.network` -- see [Network](/docs/ferrum/network). Useful for as
 its own, independently of the page that spawned it.
 
 ```ruby
-worker.network.wait_for_idle
+worker.network.wait_idle
 worker.network.traffic # => [#<Ferrum::Network::Exchange, ...]
 ```
 
@@ -105,7 +105,7 @@ worker.evaluate("1 + 1") # => 2
 Subscribe to the worker's own network interception events, same as `page.on(:request)` -- see the `intercept` method
 in [Network](/docs/ferrum/network), or to its new console messages.
 
-#### close : `Boolean`
+#### close
 
 Closes the underlying CDP target and the worker's own connection.
 

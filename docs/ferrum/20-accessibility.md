@@ -6,7 +6,7 @@ sidebar_position: 20
 
 Ferrum wraps the CDP [Accessibility](https://chromedevtools.github.io/devtools-protocol/tot/Accessibility/) domain,
 letting you read the accessibility (AX) tree that assistive technologies (like screen readers) rely on. The query
-methods below work without calling `enable` first; `enable`/`disable` exist only if you want live AX events.
+methods below work without enabling the domain first, `enabled = true` is only needed for live AX events.
 
 `page.accessibility` returns the `Ferrum::Accessibility` instance for a page.
 
@@ -29,12 +29,12 @@ page.accessibility.node_for(node) # => #<Ferrum::Accessibility::AXNode ...>
 
 You can also get to it directly from the node itself:
 
-#### axnode : `AXNode | nil`
+#### ax_node : `AXNode | nil`
 
-`Node#axnode` is a shortcut for `page.accessibility.node_for(self)`.
+`Node#ax_node` is a shortcut for `page.accessibility.node_for(self)`.
 
 ```ruby
-page.at_css("button").axnode.role # => "button"
+page.at_css("button").ax_node.role # => "button"
 ```
 
 #### partial_tree(\*\*options) : `Array[AXNode]`
@@ -87,11 +87,15 @@ page.accessibility.query(role: "button")
 page.accessibility.query(name: "Submit", role: "button")
 ```
 
-#### enable : `self`
-#### disable : `self`
+#### enabled=(enabled)
 
-Enable/disable the CDP Accessibility domain, only needed if you want live AX events; the query methods above work
+Turns the CDP Accessibility domain on or off, only needed if you want live AX events; the query methods above work
 without it.
+
+```ruby
+page.accessibility.enabled = true
+page.on("Accessibility.nodesUpdated") { |params| puts params["nodes"].size }
+```
 
 ## AXNode
 

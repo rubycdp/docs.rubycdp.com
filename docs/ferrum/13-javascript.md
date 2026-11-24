@@ -44,12 +44,12 @@ list = page.evaluate_handle("document.querySelectorAll('li')")
 page.evaluate("Array.from(nodes).map(n => n.textContent)", nodes: list)
 ```
 
-#### execute(expression, \*args, timeout: nil, \*\*named) : `Boolean`
+#### execute(expression, \*args, timeout: nil, \*\*named)
 
 Run JavaScript for its side effects. The script is used as a function body, so statements need no wrapping.
 
 ```ruby
-page.execute("window.scrollBy(0, 100)") # => true
+page.execute("window.scrollBy(0, 100)")
 ```
 
 `Ferrum::Node` has the same three methods, with `this` bound to the element. Arrow functions don't get `this`, so use a
@@ -62,16 +62,10 @@ page.at_css("input").execute("this.value = text", text: "hello")
 
 #### Upgrading to 0.21
 
-Scripts written for the old API run exactly as before, and Ferrum warns, pointing at your code, about any whose result
-will change. Calls that only the new API can make, e.g. with named arguments, already run the new way.
-
-* 0.20 runs old-style scripts the old way and warns. Set `FERRUM_JS_API=new` to run everything the new way.
-* 0.21 removes the old way, along with `evaluate_async`, `evaluate_func` and `evaluate_on`. There's no switch back.
-
-Warnings only cover the scripts and results your suite actually runs into, so before upgrading to 0.21, run the suite
-once with `FERRUM_JS_API=new`. Set `FERRUM_DEPRECATION_WARNINGS=raise` to turn the warnings into errors while
-migrating, or `0` to silence them. A library built on Ferrum should pass named arguments or a function declaration,
-which run the new way in both 0.20 and 0.21.
+0.21 removes the JavaScript API from before named arguments, along with `evaluate_async`, `evaluate_func` and
+`evaluate_on`. Plain expressions and positional arguments, `evaluate("document.title")` or
+`evaluate("arguments[0] + 1", 1)`, work as before. Upgrade to 0.20 first and fix what it warns about, or run your
+suite on 0.20 with `FERRUM_JS_API=new`, which behaves like 0.21. These scripts behave differently:
 
 | Script | < 0.21 | >= 0.21 | Notes |
 |---|---|---|---|
@@ -85,7 +79,7 @@ which run the new way in both 0.20 and 0.21.
 | `evaluate_async("arguments[0](1)", 5)` | `1` | `NoMethodError` | `evaluate("await …", timeout: 5)` |
 | `evaluate_func("function(a) { return a }", 1)` | `1` | `NoMethodError` | `evaluate("function(a) { return a }", 1)`, with `on:` use `node.evaluate` |
 | `evaluate_on(node: node, expression: "this.id")` | `"main"` | `NoMethodError` | `node.evaluate("this.id")` |
-| `evaluate_on(node: link, expression: "this.click()", wait: 0.1)` | waits for the new page | `NoMethodError` | `page.wait_for_navigation!(0.1) { link.evaluate("this.click()") }` |
+| `evaluate_on(node: link, expression: "this.click()", wait: 0.1)` | waits for the new page | `NoMethodError` | `page.await_navigation!(watch: 0.1) { link.evaluate("this.click()") }` |
 
 #### evaluate_on_new_document(source, \*\*options) : `String`
 
@@ -123,12 +117,12 @@ page.evaluate("window.secret") # => nil
 world.evaluate("document.title") # => same as page.evaluate("document.title")
 ```
 
-#### remove_script_on_new_document(identifier) : `Boolean`
+#### remove_script_on_new_document(identifier)
 
 Stops running a script added with `evaluate_on_new_document` in new documents.
 
 ```ruby
-page.remove_script_on_new_document(id) # => true
+page.remove_script_on_new_document(id)
 ```
 
 #### add_extension(extension)
@@ -166,27 +160,28 @@ page.add_script_tag(url: "http://example.com/stylesheet.css") # => true
 page.add_style_tag(content: "h1 { font-size: 40px; }") # => true
 
 ```
-#### bypass_csp(\*\*options) : `Boolean`
+#### bypass_csp=(enabled)
 
-* options `Hash`
-  * :enabled `Boolean`, `true` by default
+Turns bypassing the page's Content Security Policy on or off, from the next navigation.
 
 ```ruby
-page.bypass_csp # => true
+page.bypass_csp = true
 page.go_to("https://github.com/ruby-concurrency/concurrent-ruby/blob/master/docs-source/promises.in.md")
-page.refresh
 page.add_script_tag(content: "window.__injected = 42")
 page.evaluate("window.__injected") # => 42
 ```
 
-#### disable_javascript
+#### javascript=(enabled)
 
-Disables Javascripts from the loaded HTML source.
-You can still evaluate JavaScript with `evaluate` or `execute`.
-Returns nothing.
+Turns the page's own scripts on or off. You can still evaluate JavaScript with `evaluate` or `execute`. Scripts skipped
+while they were off don't run when you turn them back on, reload the page for that. `javascript?` tells whether they
+are on.
 
 ```ruby
-page.disable_javascript
+page.javascript = false
+page.go_to("https://github.com/")
+page.javascript = true
+page.refresh
 ```
 
 ## Console

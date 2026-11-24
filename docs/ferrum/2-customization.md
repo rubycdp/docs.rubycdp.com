@@ -17,7 +17,7 @@ Ferrum::Browser.new(options)
     * `:xvfb` (Boolean) - Run browser in a virtual framebuffer, `false` by default.
     * `:flatten` (Boolean) - Use one websocket connection to the browser and all the pages in flatten mode,
       `true` by default. When set to `false`, each page/target opens its own dedicated websocket connection instead
-      of sharing the browser's connection.
+      of sharing the browser's connection. Passing `false` is deprecated, the option will be removed in 0.22.
     * `:window_size` (Array) - The dimensions of the browser window in which to
       test, expressed as a 2-element array, e.g. [1024, 768]. Default: [1024, 768]
     * `:extensions` (Array[String | Hash]) - An array of paths to files or JS
@@ -27,14 +27,17 @@ Ferrum::Browser.new(options)
       written to it, see [Logging](#logging).
     * `:slowmo` (Integer | Float) - Set a delay in seconds to wait before sending command.
       Useful companion of headless option, so that you have time to see changes.
-    * `:timeout` (Numeric) - The number of seconds we'll wait for a response when
-      communicating with browser. Default is 5.
-    * `:js_errors` (Boolean) - When true, JavaScript errors get re-raised in Ruby.
-    * `:pending_connection_errors` (Boolean) - Raise `PendingConnectionsError` when main frame is still waiting
-      for slow responses and timeout is reached. Default is false.
-    * `:browser_name` (Symbol) - `:chrome` by default, `:opera` and `:edge` are
-      also supported.
-    * `:browser_path` (String) - Path to Chrome binary, you can also set ENV
+    * `:timeout` (Numeric) - How long a call waits for the browser, in seconds, `FERRUM_DEFAULT_TIMEOUT` or 5 by
+      default. `go_to`, `refresh` and `await_navigation` wait for the page to load within it. A call that only sends
+      commands, like `evaluate` or `at_css`, waits for the browser's answer. A call that runs out raises
+      `Ferrum::TimeoutError`. Pass `timeout:` to `go_to`, `refresh` or `await_navigation` to change it for one
+      call, or wrap calls in `Ferrum::Deadline.within` to bound them together, see [Timeouts](#timeouts).
+    * `:js_errors` (Boolean) - Deprecated, will be removed in 0.22. When true, JavaScript errors get re-raised in
+      Ruby. Uncaught exceptions are in the [console](/docs/ferrum/javascript#console), use
+      `page.console.select { |m| m.source == :exception }` or `page.on(:console)` instead.
+    * `:pending_connection_errors` (Boolean) - Deprecated, will be removed in 0.22. Use `page.go_to!(url)` to raise
+      when the page doesn't load in time.
+    * `:browser_path` (String) - Path to Chrome binary, or to an Opera or Edge one, you can also set ENV
       variable as `BROWSER_PATH=some/path/chrome bundle exec rspec`.
     * `:browser_options` (Hash) - Additional command line options,
       [see them all](https://peter.sh/experiments/chromium-command-line-switches/)
@@ -52,7 +55,7 @@ Ferrum::Browser.new(options)
     * `:ws_url` (String) - Websocket url for a running instance of Chrome. If this is set, a
       browser process will not be spawned. It's higher priority than `:url`, setting both doesn't make sense.
     * `:process_timeout` (Integer) - How long to wait for the Chrome process to
-      respond on startup.
+      respond on startup, or to connect to the browser at `:url` or `:ws_url`.
     * `:ws_max_receive_size` (Integer) - How big messages to accept from Chrome
       over the web socket, in bytes. Defaults to 64MB. Incoming messages larger
       than this will cause a `Ferrum::DeadBrowserError`.
@@ -80,7 +83,7 @@ FERRUM_LOG=0                         # nothing, even with :logger
 
 Items with a dot are CDP method patterns, a leading `-` leaves things out and wins over the rest, and a response is
 kept or dropped with the command it answers. Without `FERRUM_LOG`, `:logger` gets everything. `FERRUM_DEBUG` still
-works as `FERRUM_LOG=*`, but is deprecated.
+works as `FERRUM_LOG=*`, but is deprecated and will be removed in 0.22.
 
 `FERRUM_LOG_FORMAT` picks how CDP messages look. `json` writes each message as JSON alone, one per line and never
 colored, for tools such as `jq`. `annotated` puts the command id and method in front of each CDP message, one line
@@ -176,9 +179,6 @@ Ferrum::Browser.new(headless: false, window_size: [1920, 1080])
 # Connect to an existing Chrome instance
 Ferrum::Browser.new(url: "http://localhost:9222")
 
-# Enable JavaScript error raising
-Ferrum::Browser.new(js_errors: true)
-
 # Set custom timeout and slowmo for debugging
 Ferrum::Browser.new(timeout: 10, slowmo: 0.5)
 
@@ -188,3 +188,23 @@ Ferrum::Browser.new(browser_path: "/Applications/Google Chrome.app/Contents/MacO
 # Add custom browser options
 Ferrum::Browser.new(browser_options: { "disable-web-security" => nil })
 ```
+
+## Timeouts
+
+Every call that talks to the browser can raise `Ferrum::TimeoutError`, and `Ferrum::DeadBrowserError` when the browser is
+gone, even where nothing looks like a request, like `page.cookies.each`. Each call waits at most the `:timeout` option.
+
+To bound a group of calls by one budget, wrap them in `Ferrum::Deadline.within`. Every call made in the block by the
+same thread shares what is left of it, and a call can only shorten it, never extend it:
+
+```ruby
+Ferrum::Deadline.within(10) do
+  page.go_to("https://example.com")
+  page.cookies.to_a
+  page.evaluate("document.title")
+end
+# => raises Ferrum::TimeoutError from the first call that runs out of the 10 seconds
+```
+
+Blocks nest, the shorter budget wins. Other threads, such as event callbacks, don't inherit it, open a block of their own
+there.
