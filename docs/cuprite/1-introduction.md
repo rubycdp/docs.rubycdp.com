@@ -79,9 +79,9 @@ Capybara has no API for what you need:
 
 ```ruby
 browser = page.driver.browser
-browser.headers.set("Accept-Language" => "de")
+browser.network.emulate(accept_language: "de")
 browser.cookies.set(name: "stealth", value: "omg")
-browser.network.wait_for_idle
+browser.network.wait_idle
 browser.network.traffic.last.response.status # => 200
 browser.mouse.move(x: 123, y: 456).down.up
 browser.screenshot(format: :jpeg, quality: 60)
@@ -91,9 +91,9 @@ browser.downloads.files
 
 A few things to keep in mind:
 
-- It follows Capybara. Page methods such as `browser.evaluate`, `browser.css`
-  or `browser.current_url` run in the window and frame Capybara is switched to,
-  for example inside `within_window` or `within_frame`.
+- It follows Capybara. Page methods such as `browser.evaluate` or `browser.css`
+  run in the window and frame Capybara is switched to, for example inside
+  `within_window` or `within_frame`.
 - It's reset between tests. Capybara's reset disposes the browser context, so
   headers, cookies, request interception, recorded traffic, console messages
   and downloads are gone in the next test. Browser-wide settings such as

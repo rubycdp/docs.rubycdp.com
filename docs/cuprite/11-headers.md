@@ -11,17 +11,24 @@ They are cleared at the end of every test.
 ```ruby
 headers = page.driver.browser.headers
 headers.get # => {}
-headers.set("User-Agent" => "Cuprite")
-headers.add({ "Accept-Language" => "de" })
-headers.get # => { "User-Agent" => "Cuprite", "Accept-Language" => "de" }
+headers.set("X-Trace" => "1")
+headers.add({ "X-Tenant" => "acme" })
+headers.get # => { "X-Trace" => "1", "X-Tenant" => "acme" }
 ```
 
-`set` overwrites already set headers, `add` merges into them. With
-`permanent: false` a `Referer` header is applied to the next navigation only:
+`set` overwrites already set headers, `add` merges into them. A `Referer`
+header is sent with every request, for the referrer of one navigation only pass
+it to `go_to`:
 
 ```ruby
-page.driver.browser.headers.add({ "Referer" => "https://example.com" }, permanent: false)
+page.driver.browser.go_to("/landing", referrer: "https://example.com")
 ```
 
-`page.driver.headers`, `headers=`, `add_headers` and `add_header` are
-deprecated in favor of these.
+To change the user agent or the language use Ferrum's
+[network.emulate](/docs/ferrum/network), which overrides the `User-Agent` and
+`Accept-Language` headers together with what `navigator` reports. It is reset
+at the end of every test too:
+
+```ruby
+page.driver.browser.network.emulate(user_agent: "Cuprite", accept_language: "de")
+```

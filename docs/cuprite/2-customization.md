@@ -13,24 +13,28 @@ end
 ```
 
 Cuprite accepts all [Ferrum options](/docs/ferrum/customization), such as
-`:headless`, `:timeout`, `:js_errors`, `:browser_path`, `:browser_options`,
+`:headless`, `:timeout`, `:browser_path`, `:browser_options`,
 `:url`, `:proxy`, `:dockerize` and others.
 
 Cuprite-specific options are:
 
 * options `Hash`
+  * `:js_errors` (Boolean) - Re-raise JavaScript errors from the page as `Ferrum::JavaScriptError` in Ruby, `false`
+    by default. See [JavaScript errors](/docs/cuprite/javascript#javascript-errors).
+  * `:pending_connection_errors` (Boolean) - Raise `Capybara::Cuprite::PendingConnectionsError` from
+    `visit`, naming the requests still pending, when the page doesn't load in time, `true` by default.
   * `:screen_size` (Array) - Size used by `maximize_window`, `[1366, 768]` by default.
   * `:raise_on_unhandled_modal` (Boolean) - What to do when a JavaScript dialog is opened but not handled by
     `accept_*`/`dismiss_*`. When `false` (default) a warning is printed, when `true`
     `Capybara::Cuprite::UnhandledModalError` is raised. See [Modals](/docs/cuprite/modals).
-  * `:url_blacklist` (Array) - Regexes to match against requested URLs that should be blocked, see
-    [URL filtering](/docs/cuprite/url-filtering).
-  * `:url_whitelist` (Array) - Regexes to match against requested URLs that are allowed, see
-    [URL filtering](/docs/cuprite/url-filtering).
+  * `:url_blacklist` (Array) - Regexes to match against requested URLs that should be blocked, alias
+    `:url_blocklist`, see [URL filtering](/docs/cuprite/url-filtering).
+  * `:url_whitelist` (Array) - Regexes to match against requested URLs that are allowed, alias `:url_allowlist`,
+    see [URL filtering](/docs/cuprite/url-filtering).
   * `:emulate` (Symbol) - Device to emulate, one of those listed in Chrome DevTools' device toolbar, such as
     `:iphone_16`, `:pixel_9`, `:samsung_galaxy_a55` or `:ipad_mini`, see `Capybara::Cuprite::Devices::LIST`. It sets
     the device's `:window_size`, `:scale_factor` and `:mobile`, options passed explicitly take precedence, and its
-    user agent, unless a `User-Agent` is set with [headers](/docs/cuprite/headers).
+    user agent, unless one is set with `network.emulate(user_agent:)`, see [headers](/docs/cuprite/headers).
   * `:mobile` (Boolean) - Emulate a mobile device: honor `<meta name="viewport">` and enable touch events, `false`
     by default. Kept across window resizes.
   * `:scale_factor` (Numeric) - Device scale factor (`window.devicePixelRatio`) to emulate, `0` (browser default)
@@ -39,7 +43,6 @@ Cuprite-specific options are:
 Cuprite changes a few Ferrum defaults:
 
 * `:save_path` - defaults to `Capybara.save_path` if it's set.
-* `:pending_connection_errors` - `true` by default.
 * `:browser_options` - `"remote-allow-origins" => "*"` is always added, so that
   [debug](/docs/cuprite/debugging) can open DevTools, and so is `"disable-web-security" => nil`, so that tests
   can reach into cross-origin frames.
@@ -74,8 +77,7 @@ Capybara::Cuprite::Driver.new(app, emulate: :pixel_9, scale_factor: 1)
 
 ## Environment variables
 
-* `CUPRITE_DEBUG` - When set, Ferrum prints all CDP messages to `STDOUT`.
+* `CUPRITE_LOG` - What Ferrum logs to `STDOUT`, the same values as `FERRUM_LOG`, `*` for everything.
 * `BROWSER_PATH` - Path to the Chrome binary.
-* `CUPRITE_MODAL_WAIT` - How often to check for a modal dialog while waiting for it, `0.05` seconds by default.
-* `CUPRITE_TRIGGER_CLICK_WAIT` - How long to wait for a possible navigation after `trigger("click")`, `0.1` seconds
-  by default.
+* `FERRUM_NAVIGATION_WAIT` - How long a click, real or `trigger("click")`, watches for the navigation it may start,
+  `0.1` seconds by default, `0` turns it off.
